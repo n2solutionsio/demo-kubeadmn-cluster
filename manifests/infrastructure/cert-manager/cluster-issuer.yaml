@@ -1,0 +1,32 @@
+# Let's Encrypt via DNS-01, solved through Cloudflare.
+#
+# DNS-01 rather than HTTP-01 is deliberate: the site is served on a private
+# address, so Let's Encrypt could never reach it for an HTTP-01 challenge.
+# Proving control of the DNS record instead means a genuinely trusted
+# certificate on a host that is not exposed to the internet.
+#
+# The referenced secret is created out of band and is not in this repository:
+#
+#   kubectl -n cert-manager create secret generic cloudflare-api-token \
+#     --from-literal=api-token="<token>"
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@n2solutions.io
+    privateKeySecretRef:
+      name: letsencrypt-production-account-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token
+              key: api-token
+        selector:
+          dnsZones:
+            - n2solutions.io

@@ -1,0 +1,20 @@
+# Without this, an address from the pool is allocated but never announced on
+# the network: the Service shows an EXTERNAL-IP that nothing can reach. The
+# policy makes a node answer ARP for that address, so it becomes reachable from
+# the LAN.
+#
+# Note the API version differs from the IP pool above -- the pool has graduated
+# to v2 while this resource is still v2alpha1 in Cilium 1.19.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: demo-l2
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  # Interface carrying the node's address on the LAN. Check with `ip -br addr`
+  # on a node if yours differs.
+  interfaces:
+    - ^eth0$
+  externalIPs: true
+  loadBalancerIPs: true

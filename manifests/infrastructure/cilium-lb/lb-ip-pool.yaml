@@ -1,0 +1,15 @@
+# Address pool Cilium draws from when a Service requests type LoadBalancer.
+#
+# This range sits between the statically assigned node addresses and the start
+# of the DHCP pool on the same VLAN, so it cannot collide with either. Adjust
+# to a free range on your own network.
+apiVersion: cilium.io/v2
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: demo-pool
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  blocks:
+    - start: "10.30.30.30"
+      stop: "10.30.30.39"
