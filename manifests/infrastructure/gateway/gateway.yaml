@@ -21,6 +21,18 @@ metadata:
 spec:
   gatewayClassName: cilium
   listeners:
+    # Exists only to redirect. Without it nothing listens on 80, so a browser
+    # given a bare hostname -- which is what anyone actually types -- hangs
+    # until it times out rather than being sent to HTTPS. The redirect itself
+    # is defined by the https-redirect HTTPRoute.
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.demo.homelab.n2solutions.io"
+      allowedRoutes:
+        namespaces:
+          from: Same
+
     - name: https
       protocol: HTTPS
       port: 443

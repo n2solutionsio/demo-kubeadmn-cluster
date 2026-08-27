@@ -5,3 +5,4 @@ namespace: nginx-demo
 resources:
   - certificate.yaml
   - gateway.yaml
+  - https-redirect.yaml

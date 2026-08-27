@@ -10,7 +10,12 @@ metadata:
   namespace: nginx-demo
 spec:
   parentRefs:
+    # sectionName pins this to the HTTPS listener. Omitting it attaches the
+    # route to *every* listener on the Gateway, including the plaintext one --
+    # which silently serves the application over HTTP and takes precedence over
+    # the redirect, so the site answers on port 80 instead of being upgraded.
     - name: demo-gateway
+      sectionName: https
   hostnames:
     - nginx.demo.homelab.n2solutions.io
   rules:

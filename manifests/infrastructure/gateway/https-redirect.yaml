@@ -1,0 +1,28 @@
+# Sends every plaintext request to HTTPS.
+#
+# Owned by the cluster admin alongside the Gateway rather than by the
+# application: it applies to the whole zone, and TLS policy is not an
+# application team's decision to make or to opt out of.
+#
+# sectionName pins this route to the HTTP listener specifically. Without it the
+# route would attach to every listener on the Gateway, including the HTTPS one,
+# and redirect HTTPS traffic back to itself in a loop.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: https-redirect
+  namespace: nginx-demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  parentRefs:
+    - name: demo-gateway
+      sectionName: http
+  hostnames:
+    - "*.demo.homelab.n2solutions.io"
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
