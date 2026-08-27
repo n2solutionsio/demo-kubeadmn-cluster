@@ -1,0 +1,22 @@
+# Template, not directly appliable: spec.request must contain the base64 of a
+# CSR generated from a private key that exists only on the requester's machine.
+#
+# That is the point -- the key is the identity, so it is never committed and
+# never leaves the user. Render this with the generated CSR:
+#
+#   export CSR_B64=$(base64 < nginx-deployer.csr | tr -d '\n')
+#   envsubst < manifests/rbac/csr-template.yaml | kubectl apply -f -
+#
+# expirationSeconds is deliberately short. Kubernetes cannot revoke an issued
+# client certificate -- there is no CRL and no deny list -- so a short lifetime
+# is the only bound on how long a leaked credential remains usable.
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: nginx-deployer
+spec:
+  request: ${CSR_B64}
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: 604800     # 7 days
+  usages:
+    - client auth

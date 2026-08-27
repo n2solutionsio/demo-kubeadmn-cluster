@@ -1,0 +1,52 @@
+# Least-privilege Role for the application deployer.
+#
+# Scoped to what the brief asks a user to do -- deploy, access and monitor an
+# application -- and nothing more. Being explicit about what is *withheld*
+# matters as much as what is granted:
+#
+#   secrets           Not granted. The namespace holds the TLS private key
+#                     issued by cert-manager; a deployer does not need to read
+#                     it, and granting it would let them exfiltrate the
+#                     certificate for the site.
+#
+#   pods/exec         Not granted. Shell access into a running container
+#                     sidesteps every other control here.
+#
+#   pods/portforward  Not granted. It tunnels past network policy and the
+#                     Gateway. The application is reachable through its route,
+#                     which is the intended access path.
+#
+#   gateways          Not granted. The Gateway is shared infrastructure owned by
+#                     the cluster admin. The deployer may attach a route to it
+#                     but cannot alter listeners or swap its certificate.
+#
+# No ClusterRole is bound to this identity, so it has no cluster-scoped
+# visibility at all -- it cannot even list namespaces or nodes.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: nginx-deployer
+  namespace: nginx-demo
+rules:
+  # Deploy and manage the workload
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Monitor it
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+
+  # Expose it: attach a route to the shared Gateway, but not modify the Gateway
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources: ["httproutes"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

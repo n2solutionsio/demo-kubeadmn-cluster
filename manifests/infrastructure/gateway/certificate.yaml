@@ -1,0 +1,26 @@
+# cert-manager issues this from Let's Encrypt and writes the result into the
+# secret named below. The Gateway then references that secret.
+#
+# Requesting the certificate explicitly, rather than annotating the Gateway and
+# letting cert-manager infer it, is deliberate: the Certificate is a real object
+# you can inspect, describe and show issuing during a demo. The annotation
+# approach hides that behind a controller and needs cert-manager's Gateway API
+# support switched on.
+#
+# The secret lands in this namespace alongside the application, which is exactly
+# why the deployer Role withholds `secrets` -- otherwise a user who can deploy
+# an app could read the private key for the site's certificate.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nginx-demo-tls
+  namespace: nginx-demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  secretName: nginx-demo-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    - nginx.demo.homelab.n2solutions.io

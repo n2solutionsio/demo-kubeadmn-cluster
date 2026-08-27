@@ -1,0 +1,35 @@
+# Shared entry point into the cluster, owned by the cluster admin.
+#
+# This is the split the RBAC model enforces: the admin owns the Gateway --
+# listeners, TLS, the address it answers on -- while an application team
+# attaches an HTTPRoute to it. A deployer can publish a route but cannot change
+# the certificate, add a listener, or take over the address.
+#
+# allowedRoutes restricts attachment to this namespace. Widening it to other
+# namespaces would let any team with route permissions publish on this hostname.
+#
+# Cilium creates a LoadBalancer Service for this Gateway and draws its address
+# from the CiliumLoadBalancerIPPool, then announces it on the LAN via the L2
+# announcement policy.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: demo-gateway
+  namespace: nginx-demo
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: nginx.demo.homelab.n2solutions.io
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: nginx-demo-tls
+      allowedRoutes:
+        namespaces:
+          from: Same

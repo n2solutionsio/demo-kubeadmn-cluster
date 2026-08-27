@@ -1,0 +1,25 @@
+# Binds to a *group*, not a user.
+#
+# Kubernetes has no user objects. Identity comes from the client certificate:
+# the Common Name (CN) becomes the username and each Organization (O) becomes a
+# group. Binding the Role to the group means issuing a second certificate with
+# O=nginx-deployers grants the same access with no change to this manifest --
+# whereas binding to a single CN would need a new RoleBinding per person.
+#
+# It also makes the reverse true, and this is the weakness worth naming in the
+# demo: revoking one person's access is not a Kubernetes operation. There is no
+# object to delete. The certificate stays valid until it expires, which is why
+# the CSR requests a short lifetime.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nginx-deployer
+  namespace: nginx-demo
+subjects:
+  - kind: Group
+    name: nginx-deployers        # from O= in the client certificate
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: nginx-deployer
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,35 @@
+# The static site itself. A ConfigMap rather than a custom image keeps the demo
+# self-contained -- no registry, no build step -- and makes the content
+# reviewable in the repository.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-content
+  namespace: nginx-demo
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>nginx-demo</title>
+      <style>
+        body { font-family: system-ui, sans-serif; max-width: 42rem;
+               margin: 4rem auto; padding: 0 1rem; line-height: 1.6; }
+        code { background: #f4f4f5; padding: 0.1rem 0.3rem; border-radius: 3px; }
+        .meta { color: #52525b; font-size: 0.9rem; }
+      </style>
+    </head>
+    <body>
+      <h1>nginx-demo</h1>
+      <p>Served from a Kubernetes cluster built with <code>kubeadm</code>.</p>
+      <ul>
+        <li>Networking and Gateway: Cilium, replacing kube-proxy</li>
+        <li>Certificate: issued by cert-manager via Let's Encrypt DNS-01</li>
+        <li>Deployed by a namespace-scoped user authenticated with a
+            client certificate issued through the Kubernetes CSR API</li>
+      </ul>
+      <p class="meta">This page was deployed by <code>nginx-deployer</code>,
+         not by a cluster administrator.</p>
+    </body>
+    </html>

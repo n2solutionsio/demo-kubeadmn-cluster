@@ -1,0 +1,9 @@
+# The namespace is the security boundary. The deployer's Role is namespaced,
+# and it holds no ClusterRole, so its authority stops at this edge -- it cannot
+# see or touch anything in kube-system, cert-manager, or any other namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-demo
+  labels:
+    app.kubernetes.io/part-of: nginx-demo
