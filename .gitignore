@@ -1,0 +1,14 @@
+# User credentials generated during the CSR workflow.
+#
+# The private key IS the identity in Kubernetes certificate authentication --
+# there are no user objects, and there is no revocation. Committing any of this
+# would hand over the deployer's access with no way to withdraw it short of
+# waiting for expiry.
+credentials/
+*.key
+*.crt
+*.csr
+*.kubeconfig
+
+# Local kustomize/kubectl scratch
+*.tmp
