@@ -13,14 +13,23 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: nginx-demo-tls
+  name: demo-wildcard-tls
   namespace: nginx-demo
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  secretName: nginx-demo-tls
+  secretName: demo-wildcard-tls
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
+  # A wildcard for this cluster's own DNS zone, so every application deployed
+  # here is covered by one certificate rather than triggering a fresh issuance
+  # per hostname. Let's Encrypt only issues wildcards via DNS-01, which is
+  # already how this issuer is configured.
+  #
+  # A wildcard covers one label: *.demo.homelab.n2solutions.io matches
+  # nginx.demo.… but not demo.homelab.… itself, so the apex is listed
+  # separately.
   dnsNames:
-    - nginx.demo.homelab.n2solutions.io
+    - "*.demo.homelab.n2solutions.io"
+    - demo.homelab.n2solutions.io

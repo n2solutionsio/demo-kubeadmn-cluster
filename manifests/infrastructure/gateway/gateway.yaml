@@ -24,12 +24,19 @@ spec:
     - name: https
       protocol: HTTPS
       port: 443
-      hostname: nginx.demo.homelab.n2solutions.io
+      # Wildcard for this cluster's DNS zone. The Gateway terminates TLS for
+      # every name under it; each application then claims its own specific
+      # hostname in its HTTPRoute. Adding a second app needs no change here.
+      hostname: "*.demo.homelab.n2solutions.io"
       tls:
         mode: Terminate
         certificateRefs:
           - kind: Secret
-            name: nginx-demo-tls
+            name: demo-wildcard-tls
+      # Restricting attachment to this namespace matters more with a wildcard
+      # listener: were other namespaces permitted, any team able to create an
+      # HTTPRoute could claim any hostname in the zone -- including one already
+      # in use by another application.
       allowedRoutes:
         namespaces:
           from: Same
